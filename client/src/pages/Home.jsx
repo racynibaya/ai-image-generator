@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { Card, FormField, Loader } from '../components';
 
 const RenderCards = ({ data, title }) => {
+  console.log(data);
   if (data?.length > 0) {
-    return data.map(post => <Card key={post.id} {...data} />);
+    return data.map((post, i) => <Card key={post._id} {...post} />);
   }
 
   return (
@@ -16,6 +17,50 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [allPost, setAllPost] = useState(null);
   const [searchText, setSearchText] = useState('');
+  const [searchedResults, setSearchedResults] = useState(null);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  console.log(allPost);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const response = await fetch('http://localhost:9000/api/v1/post');
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(result);
+          setAllPost(result.data.reverse());
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSearchChange = e => {
+    clearTimeout(setTimeout);
+    setSearchText(e.target.value);
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const searchResult = allPost.filter(
+          item =>
+            item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.prompt.toLowerCase().includes(searchText.toLowerCase())
+        );
+
+        setSearchedResults(searchResult);
+      }, 500)
+    );
+  };
+
   return (
     <section className='max-w-7xl mx-auto'>
       <div>
@@ -28,7 +73,14 @@ const Home = () => {
         </p>
       </div>
       <div className='mt-16'>
-        <FormField />
+        <FormField
+          labelName='Search Posts'
+          type='text'
+          name='text'
+          placeholder='Search posts'
+          value={searchText}
+          handleChange={handleSearchChange}
+        />
       </div>
 
       <div className='mt-10'>
@@ -47,9 +99,9 @@ const Home = () => {
 
             <div className='grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 gap-3'>
               {searchText ? (
-                <RenderCards data={[]} title='No search found' />
+                <RenderCards data={searchedResults} title='No search found' />
               ) : (
-                <RenderCards data={[]} title='No post found' />
+                <RenderCards data={allPost} title='No post found' />
               )}
             </div>
           </>
