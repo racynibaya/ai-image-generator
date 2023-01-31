@@ -27,7 +27,9 @@ const Home = () => {
       setLoading(true);
 
       try {
-        const response = await fetch('http://localhost:9000/api/v1/post');
+        const response = await fetch(
+          'https://dall-e-server-bvrb.onrender.com/api/v1/post'
+        );
 
         if (response.ok) {
           const result = await response.json();
