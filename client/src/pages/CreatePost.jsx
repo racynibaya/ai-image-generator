@@ -16,6 +16,8 @@ const CreatePost = () => {
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  console.log(form);
+
   const generateImage = async () => {
     if (form.prompt) {
       try {
